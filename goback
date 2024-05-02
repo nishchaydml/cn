@@ -1,0 +1,42 @@
+#include<stdio.h>
+#include<time.h>
+
+int transmission(int i,int n,int tf)
+{
+    while(i<=tf)
+    {
+    int k,z=0;
+    for(k=i;k<i+n && k<=tf;k++)
+    printf("Sending frame %d\n",k);
+    for(k=i;k<i+n && k<=tf ;k++)
+    {
+        int f =rand()%4;
+        if(!f)
+        {
+            printf("Acknowledge received for %d\n",k);
+            z++;
+        }
+        else
+        {
+       printf ("Frame %d not received\n",k);
+        printf("Retransmitting");
+        break;
+    }
+    
+    
+}
+printf("\n");
+i=i+z;
+}}
+
+int main()
+{
+    int n,tf,i=1;
+    srand(time(NULL));
+    printf("Enter the total no. of frames\n");
+    scanf("%d",&tf);
+    printf("Enter the window size\n");
+    scanf("%d",&n);
+    transmission(i,n,tf);
+    return 0;
+}
