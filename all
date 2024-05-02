@@ -1,0 +1,338 @@
+2. Classful addressing
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+int main()
+{
+    char a[14];
+    printf("Enter a valid IPV4 address : ");
+    scanf("%s", a);
+    int i = 0, x = 0, j = 0;
+    int y[4];
+    while (a[i] != '\0')
+    {
+        x = x * 10;
+        x += a[i] - '0';
+        i++;
+        if (a[i] == '.')
+        {
+            if (j == 3)
+            {
+                printf("invalid IP address!!");
+                return 0;
+            }
+            y[j] = x;
+            j++;
+            x = 0;
+            i++;
+        }
+    }
+    y[3] = x;
+    x = y[0];
+    if (y[0] < 0 || y[0] > 255 || y[1] < 0 || y[1] > 255 || y[2] < 0 || y[2] > 255 || y[3] < 0 || y[3] > 255)
+    {
+        printf("invalid IP address!!");
+        return 0;
+    }
+    if (x >= 0 && x <= 127)
+    {
+        printf("The given ip4 address is of class A\n");
+        printf("its Network ID is %d\n", y[0]);
+        printf("its Host Id is %d.%d.%d\n", y[1], y[2], y[3]);
+    }
+    else if (x >= 128 && x <= 191)
+    {
+        printf("The given ip4 address is of class B\n");
+        printf("its Network ID is %d.%d\n", y[0], y[1]);
+        printf("its Host Id is %d.%d\n", y[2], y[3]);
+    }
+    else if (x >= 192 && x <= 223)
+    {
+        printf("The given ip4 address is of class C\n");
+        printf("its Network ID is %d.%d.%d\n", y[0], y[1], y[2]);
+        printf("its Host Id is %d\n", y[3]);
+    }
+    else if (x >= 224 && x <= 239)
+    {
+        printf("The given ip4 address is of class D\n");
+        printf("This is multicast address\n");
+    }
+    else if (x >= 240 && x <= 255)
+    {
+        printf("The given ip4 address is of class E\n");
+    }
+    return 0;
+}
+
+3a.Go back N
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+void transmission(int n, int tf)
+{
+    int i = 1;
+    while (i <= tf)
+    {
+        int z = 0, k;
+        for (k = i; k < i + n && k <= tf; k++)
+            printf("Sending frame %d\n", k);
+        for (k = i; k < i + n && k <= tf; k++)
+        {
+            int f = rand() % 4;
+            if (!f)
+            {
+                printf("Acknowledgement for frame %d\n", k);
+                z++;
+            }
+            else
+            {
+                printf("Frame %d not received\n", k);
+                printf("Retransmitting\n");
+                break;
+            }
+        }
+        printf("\n");
+        i = i + z;
+    }
+}
+
+int main()
+{
+    int tf, n;
+    srand(time(NULL));
+    printf("Enter the total number of frames\n");
+    scanf("%d", &tf);
+    printf("Enter the window size\n");
+    scanf("%d", &n);
+    transmission(n, tf);
+    return 0;
+}
+
+3b. Selective repeat
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+int n, r;
+struct frame
+{
+    char ack;
+    int data;
+} frm[10];
+
+void sender()
+{
+    int i;
+    printf("\nEnter the number of packets to be sent:");
+    scanf("%d", &n);
+    for (i = 1; i <= n; i++)
+    {
+        printf("\nEnter data for packets[%d]: ", i);
+        scanf("%d", &frm[i].data);
+        frm[i].ack = 'y';
+    }
+}
+void recvack()
+{
+    int i;
+    r = rand() % n;
+    frm[r].ack = 'n';
+    for (i = 1; i <= n; i++)
+    {
+        if (frm[i].ack == 'n')
+            printf("\nThe packet number %d is not received\n", r);
+        else
+            printf("\nThe packet number %d is recieved having data %d\n", i, frm[i].data);
+    }
+}
+void resend()
+{
+    printf("\nResending packet %d", r);
+    sleep(2);
+    printf("\nThe received packet is %d having data %d", r, frm[r].data);
+     frm[r].ack = 'y';
+}
+int main()
+{
+    sender();
+    recvack();
+    resend();
+    printf("\nAll packets sent successfully\n");
+    return 0;
+}
+
+4. Bellman ford
+
+#include<stdio.h>
+#include<stdlib.h>
+
+int BellmanFord(int G[20][20],int nV,int nE,int edge[20][2])
+{
+    int i,j,u,v,distance[20],parent[20],S,flag = 1;
+    for(i=0;i<nV;i++)
+    {
+        distance[i]=1000;
+        parent[i]=-1;
+    }
+    printf("Enter the Source(integer value starting from 1) : ");
+    scanf("%d",&S);
+    distance[S-1]=0;
+    for(i=0;i<nV-1;i++)
+    {
+        for(j=0;j<nE;j++)
+        {
+            u = edge[j][0];
+            v = edge[j][1];
+            if(distance[u] + G[u][v] < distance[v])
+            {
+                distance[v] = distance[u] + G[u][v];
+                parent[v] = u;
+            }
+        }
+    }
+    for(j=0;j<nE;j++)
+    {
+        u = edge[j][0];
+        v = edge[j][1];
+        if(distance[u] + G[u][v] < distance[v])
+            flag = 0;
+    }
+    if(flag)
+    {
+        for(i=0;i<nV;i++)
+          printf("Vertex %d -> cost = %d , parent = %d\n",i+1,distance[i],parent[i]+1);
+    }
+    return flag;
+}
+
+int main()
+{
+    int i,j,nE=0,nV,G[20][20],edge[20][2];
+    printf("Enter the number of Vertices : ");
+    scanf("%d",&nV);
+    printf("Enter the cost matrix :- \n");
+    for(i=0;i<nV;i++)
+    {
+        for(j=0;j<nV;j++)
+        {
+            scanf("%d",&G[i][j]);
+            if(G[i][j]!=0)
+            {
+                edge[nE][0]=i;
+                edge[nE++][1]=j;
+            }
+        }
+    }
+    if(BellmanFord(G,nV,nE,edge))
+        printf("No negative cycles exist!!\n");
+    else
+        printf("Negative cycle exist!!\n");
+    return 0;
+}
+
+5.Client - server
+
+server.py:-
+import socket
+
+host = '127.0.0.1'
+port = 8500
+
+lk = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+lk.bind((host,port))
+lk.listen()
+client , address = lk.accept()
+while True:
+    data = client.recv(1024).decode()
+    respone = ""
+    if not data:
+        break
+    else:
+        print("Text recieved is : "+str(data))
+        print("Sending this text in upper case back to Client...")
+        response = data.upper()
+        client.send(response.encode())
+
+client.close()
+
+client.py:-
+
+import socket
+
+host = '127.0.0.1'
+port = 8500
+
+lk = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+
+lk.connect((host,port))
+
+message = input(" -> ")
+
+while message.lower().strip() != 'end':
+    lk.send(message.encode())
+    data = lk.recv(1024).decode()
+ 
+    print('Received from server: ' + data)
+
+    message = input(" -> ")
+    
+response = lk.recv(1024)
+
+6. Hamming code
+
+#include <stdio.h>
+
+void main()
+{
+    int data[10];
+    int dataatrec[10], c, c1, c2, c3, i;
+
+    printf("Enter 4 bits of data\n");
+    scanf("%d", &data[0]);
+    scanf("%d", &data[1]);
+    scanf("%d", &data[2]);
+    scanf("%d", &data[4]);
+    
+    data[6] = data[0] ^ data[2] ^ data[4];
+    data[5] = data[0] ^ data[1] ^ data[4];
+    data[3] = data[0] ^ data[1] ^ data[2];
+
+    printf("\nEncoded data is\n");
+    for (i = 0; i < 7; i++)
+        printf("%d", data[i]);
+
+    printf("\n\nEnter received data bits one by one\n");
+    for (i = 0; i < 7; i++)
+        scanf("%d", &dataatrec[i]);
+
+    c1 = dataatrec[6] ^ dataatrec[4] ^ dataatrec[2] ^ dataatrec[0];
+    c2 = dataatrec[5] ^ dataatrec[4] ^ dataatrec[1] ^ dataatrec[0];
+    c3 = dataatrec[3] ^ dataatrec[2] ^ dataatrec[1] ^ dataatrec[0];
+    c = c3 * 4 + c2 * 2 + c1;
+
+    if (c == 0)
+    {
+        printf("\nNo error while transmission of data\n");
+    }
+    else
+    {
+        printf("\nError on position %d from right", c);
+
+        printf("\nCorrect message is\n");
+
+        if (dataatrec[7 - c] == 0)
+            dataatrec[7 - c] = 1;
+        else
+            dataatrec[7 - c] = 0;
+        for (i = 0; i < 7; i++)
+        {
+            printf("%d", dataatrec[i]);
+        }
+    }
+    printf("\n");
+}
